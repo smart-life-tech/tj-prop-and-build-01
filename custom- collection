@@ -384,9 +384,8 @@ void loop() {
           int fire = digitalRead (FIRE_PIN);
           if (fire == LOW) { // firing squad lol
             firingTimer = millis();
+            play14 = true;
             if (firingTimer - firePrev < 10000) {
-              play2 = true;
-              play18 = true;
               Serial.println("fire button pressed less than 10 sec");
               //firePrev = millis();
               fireStrobe(currentMillis);
@@ -395,9 +394,18 @@ void loop() {
                 mp3.play(17);
                 playOnce = false;
               }
+            } else if (firingTimer - firePrev > 10000 && firingTimer - firePrev < 20000) {
+              Serial.println("fire button pressed greater than 10 sec");
+              // firePrev = millis();
+              if (play18) {
+                mp3.play(18);
+                play18 = false;
+              }
+              //play14 = true;
+
             }
-            if (firingTimer - firePrev > 20000) {
-              play18 = true;
+            else if (firingTimer - firePrev > 20000) {
+              //play18 = true;
               Serial.println("fire button pressed greater than 20 sec");
               setVentLightState(ventStart, ventEnd, 0);
               WAND_LEDstateOFF();
@@ -408,23 +416,17 @@ void loop() {
               barGraphCHARGING (currentMillis);
               wand_charge();
             }
-            if (firingTimer - firePrev > 10000 && firingTimer - firePrev < 20000) {
-              Serial.println("fire button pressed greater than 10 sec");
-              // firePrev = millis();
-              if (play18) {
-                mp3.play(18);
-                play18 = false;
-              }
-              play14 = true;
-              playOnce = true;
-            }
+
 
           }
           else {
+            firePrev = millis();// rest timer
+            playOnce = true;
+            play2 = true;
+            play18 = true;
             if (play14) {
               Serial.println("fire button released before 10 seconds");
               clearGunLEDs();
-              firePrev = millis();
               mp3.play(14);
               play14 = false;
             }
