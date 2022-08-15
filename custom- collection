@@ -24,7 +24,7 @@
 
 SerialMP3Player mp3(RX, TX);
 
-bool playOnce, play2, play11, play18 = true;
+bool playOnce, play1,  play2, play9, play11, play16, play18, playsafe1, playsafe2, playwand, playwand2 = true;
 // Create a new POWERCELL object
 #define PM_PIN      3        // input pin Powercell strips are attached to
 #define PM_PIXELS   14     // total number of neopixels in powercell
@@ -305,7 +305,7 @@ void loop() {
   // song selection
   int theme_switch = digitalRead(MUSIC_SWITCH);
 
-  if (theme_switch == LOW  ) {
+  if (theme_switch == LOW  && startpack == HIGH) {
     if (songplaying == true)
       song ++;
     if (song > 6)song = 1;
@@ -330,7 +330,16 @@ void loop() {
         break;
     }
     songplaying = false;
-  } else songplaying = true;
+  }
+  else if (theme_switch == LOW  && startpack == LOW) {
+    if (play16) {
+      mp3.play(16);
+    }
+    play16 = false;
+  }  if (theme_switch == HIGH) {
+    songplaying = true;
+    play16 = true;
+  }
 
   if (startpack == LOW) { // if button is pressed
     if (state1) {
@@ -351,6 +360,11 @@ void loop() {
 
     // ***********do not touch above this line ***********  SERIOUSLY!! ********** DONT! *********  PLEASE? *****************
     if (startwand == LOW) { // if button is pressed
+      if (playwand) {
+        mp3.play(1);
+        playwand = false;
+      }
+      playwand2 = true;
       cyclotron.update();
       Serial.println ("wand on");
       barGraphSequenceOne(currentMillis);
@@ -361,15 +375,17 @@ void loop() {
       setWandLightState(12, 0, currentMillis); // Set slo blo flashing
       cyclotron.setSpeed(IDLE_SPD, BOOT_DLY);
       powercell_idle();
-      // mp3.play(1);
-      state1 = false;
 
+      state1 = false;
       int safe1 = digitalRead (SAFETY_ONE);
       if (safe1 == LOW) {// safety swicth 1
         safeOff = true;
+        if (playsafe1) {
+          mp3.play(1);
+          playsafe1 = false;
+        }
         Serial.println("safety one on");
         setWandLightState(18, 9, 0);
-        //mp3.play(11);
         int safe2 = digitalRead (SAFETY_TWO);
         if (safe2 == LOW) {
           safeTwo = true;
@@ -378,7 +394,7 @@ void loop() {
           setWandLightState(17, 2, 0);
           //setWandLightState(18, 1, 0);
           if (play11) {
-            mp3.play(11);
+            mp3.play(12);
             play11 = false;
           }
           int fire = digitalRead (FIRE_PIN);
@@ -434,6 +450,8 @@ void loop() {
         } else {
           play11 = true;
           if (safeTwo) {
+            mp3.play(16);
+            playsafe2 = false;
             setWandLightState(13, 4, 0);    //  vent start off
             setWandLightState(14, 4, 0);    //  vent mid   off
             setWandLightState(15, 4, 0);    // vent end   off
@@ -450,6 +468,11 @@ void loop() {
 
 
     } else {
+      if (playwand2) {
+        mp3.play(1);
+        playwand2 = false;
+      }
+      playwand = true;
       state1 = true;
     }
 
@@ -492,11 +515,13 @@ void loop() {
 
 
     */
+    play9 = true;
   }
-
-
   else {
-    // mp3.play(9);
+    if (play9) {
+      mp3.play(9);
+      play9 = false;
+    }
     cyclotron.update();
     WAND_LEDstateOFF();
     cyclotron.setSpeed(IDLE_SPD, BOOT_DLY);
