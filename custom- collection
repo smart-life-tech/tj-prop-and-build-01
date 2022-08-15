@@ -331,7 +331,7 @@ void loop() {
     }
     songplaying = false;
   }
-  else if (theme_switch == LOW  && startpack == LOW) {
+  else if (theme_switch == LOW  && startpack == LOW && state1 == false) {
     if (play16) {
       mp3.play(10);
     }
@@ -355,15 +355,10 @@ void loop() {
         mp3.play(8);
         startup = true;
       }
-
+      state1 = false;
     }
-
     // ***********do not touch above this line ***********  SERIOUSLY!! ********** DONT! *********  PLEASE? *****************
     if (startwand == LOW) { // if button is pressed
-      if (playwand) {
-        mp3.play(1);
-        playwand = false;
-      }
       playwand2 = true;
       cyclotron.update();
       Serial.println ("wand on");
@@ -376,12 +371,15 @@ void loop() {
       cyclotron.setSpeed(IDLE_SPD, BOOT_DLY);
       powercell_idle();
 
-      state1 = false;
+      if (playwand) {
+        mp3.play(1);
+        playwand = false;
+      }
       int safe1 = digitalRead (SAFETY_ONE);
       if (safe1 == LOW) {// safety swicth 1
         safeOff = true;
         if (playsafe1) {
-          mp3.play(1);
+          mp3.play(11);
           playsafe1 = false;
         }
         Serial.println("safety one on");
