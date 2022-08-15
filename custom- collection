@@ -356,11 +356,11 @@ void loop() {
         mp3.play(8);
         startup = true;
       }
-      state1 = false;
     }
     // ***********do not touch above this line ***********  SERIOUSLY!! ********** DONT! *********  PLEASE? *****************
     if (startwand == LOW) { // if button is pressed
       playwand2 = true;
+      state1 = false;
       cyclotron.update();
       Serial.println ("wand on");
       barGraphSequenceOne(currentMillis);
@@ -472,7 +472,7 @@ void loop() {
         playwand2 = false;
       }
       playwand = true;
-      //state1 = true;
+      state1 = true;
     }
 
 
