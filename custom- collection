@@ -24,7 +24,7 @@
 
 SerialMP3Player mp3(RX, TX);
 
-bool playOnce, play1,  play2, play9, play11, play16, play18, playsafe1, playsafe2, playwand, playwand2 = true;
+bool playOnce, play1,  play2, play9, play11, play16, play18, playsafe1, playsafe2, playwand, playwand2 = false;
 // Create a new POWERCELL object
 #define PM_PIN      3        // input pin Powercell strips are attached to
 #define PM_PIXELS   14     // total number of neopixels in powercell
@@ -333,10 +333,11 @@ void loop() {
   }
   else if (theme_switch == LOW  && startpack == LOW && state1 == false) {
     if (play16) {
-      mp3.play(10);
+    //  mp3.play(10);
+      play16 = false;
     }
-    play16 = false;
-  }  if (theme_switch == HIGH) {
+  }  
+  if (theme_switch == HIGH) {
     songplaying = true;
     play16 = true;
   }
@@ -468,11 +469,11 @@ void loop() {
 
     } else {
       if (playwand2) {
-        mp3.play(1);
+        mp3.play(16);
         playwand2 = false;
       }
       playwand = true;
-      state1 = true;
+      //state1 = true;
     }
 
 
