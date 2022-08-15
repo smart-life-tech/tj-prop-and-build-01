@@ -311,69 +311,14 @@ void loop() {
     const int FIRE_PIN = 9;*/
 
   int volume = map(analogRead(A0), 0, 1024, 0, 30);
-  if (volume != lastvol) {
+  if (volume > lastvol + 3 || volume < lastvol - 3) {
     lastvol = volume;
     Serial.print("Set to Volume :");
     Serial.println(volume);
     mp3.setVol(volume);
   }
 
-  //------------------------------------------------------------------------------------------------------------------------------------
-  // Read the current state of CLK
-  currentStateCLK = digitalRead(CLK);
 
-  // If last and current state of CLK are different, then pulse occurred
-  // React to only 1 state change to avoid double count
-  if (currentStateCLK != lastStateCLK  && currentStateCLK == 1) {
-
-    // If the DT state is different than the CLK state then
-    // the encoder is rotating CCW so decrement
-    if (digitalRead(DT) != currentStateCLK) {
-      counter --;
-      if (counter < 0)counter = 0;
-      mp3.play(counter);
-      currentDir = "CCW";
-    } else {
-      // Encoder is rotating CW so increment
-      counter ++;
-      if (counter > 0)counter = 6;
-      mp3.play(counter);
-      currentDir = "CW";
-    }
-
-    Serial.print("Direction: ");
-    Serial.print(currentDir);
-    Serial.print(" | Counter: ");
-    Serial.println(counter);
-  }
-
-  // Remember last CLK state
-  lastStateCLK = currentStateCLK;
-
-  // Read the button state
-  int btnState = digitalRead(SW);
-
-  //If we detect LOW signal, button is pressed
-  if (btnState == LOW) {
-    //if 50ms have passed since last LOW pulse, it means that the
-    //button has been pressed, released and pressed again
-    if (millis() - lastButtonPress > 50) {
-      Serial.println("Button pressed!");
-      paused = !paused;
-      if (paused) {
-        Serial.println("Play");
-        mp3.play();
-
-      } else {
-        Serial.println("Pause");
-        mp3.pause();
-      }
-    }
-
-    // Remember last button press event
-    lastButtonPress = millis();
-  }
-  //----------------------------------------------------------------------------------------------------------------------------
   // put your main code here, to run repeatedly:
   unsigned long currentMillis = millis();
   int startpack = digitalRead (STARTPACK_SWITCH);
@@ -387,10 +332,12 @@ void loop() {
   int theme_switch = digitalRead(MUSIC_SWITCH);
 
   if (theme_switch == LOW  && startpack == HIGH) {
-    if (songplaying == true)
+    encoderRead();
+    /*
+      if (songplaying == true)
       song ++;
-    if (song > 6)song = 1;
-    switch (song) {
+      if (song > 6)song = 1;
+      switch (song) {
       case 1:
         mp3.play(3);
         break;
@@ -409,9 +356,10 @@ void loop() {
       case 6:
         mp3.stop();
         break;
-    }
+      }*/
     songplaying = false;
   }
+
   else if (theme_switch == LOW  && startpack == LOW && state1 == false) {
     if (play16) {
       //  mp3.play(10);
@@ -1176,4 +1124,63 @@ void switch_graph_led(int num, int state) {
       io.digitalWrite(BAR_12, state);
       break;
   }
+}
+
+void encoderRead() {
+  //------------------------------------------------------------------------------------------------------------------------------------
+  // Read the current state of CLK
+  currentStateCLK = digitalRead(CLK);
+
+  // If last and current state of CLK are different, then pulse occurred
+  // React to only 1 state change to avoid double count
+  if (currentStateCLK != lastStateCLK  && currentStateCLK == 1) {
+
+    // If the DT state is different than the CLK state then
+    // the encoder is rotating CCW so decrement
+    if (digitalRead(DT) != currentStateCLK) {
+      counter --;
+      if (counter < 0)counter = 0;
+      mp3.play(counter);
+      currentDir = "CCW";
+    } else {
+      // Encoder is rotating CW so increment
+      counter ++;
+      if (counter > 0)counter = 6;
+      mp3.play(counter);
+      currentDir = "CW";
+    }
+
+    Serial.print("Direction: ");
+    Serial.print(currentDir);
+    Serial.print(" | Counter: ");
+    Serial.println(counter);
+  }
+
+  // Remember last CLK state
+  lastStateCLK = currentStateCLK;
+
+  // Read the button state
+  int btnState = digitalRead(SW);
+
+  //If we detect LOW signal, button is pressed
+  if (btnState == LOW) {
+    //if 50ms have passed since last LOW pulse, it means that the
+    //button has been pressed, released and pressed again
+    if (millis() - lastButtonPress > 200) {
+      Serial.println("Button pressed!");
+      paused = !paused;
+      if (paused) {
+        Serial.println("Play");
+        mp3.play();
+
+      } else {
+        Serial.println("Pause");
+        mp3.pause();
+      }
+    }
+
+    // Remember last button press event
+    lastButtonPress = millis();
+  }
+  //----------------------------------------------------------------------------------------------------------------------------
 }
