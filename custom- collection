@@ -333,7 +333,7 @@ void loop() {
   }
   else if (theme_switch == LOW  && startpack == LOW) {
     if (play16) {
-      mp3.play(16);
+      mp3.play(10);
     }
     play16 = false;
   }  if (theme_switch == HIGH) {
@@ -460,6 +460,7 @@ void loop() {
         }
       }
       else {
+        playsafe1 = true;
         if (safeOff) {
           mp3.play(16);
           safeOff = false;
