@@ -37,7 +37,7 @@ int currentStateCLK;
 int lastStateCLK;
 String currentDir = "";
 unsigned long lastButtonPress = 0;
-
+int playing = 5;
 Adafruit_NeoPixel powercell = Adafruit_NeoPixel(PM_PIXELS, PM_PIN, NEO_GRB + NEO_KHZ800);
 int  PM_TIME =  800;       // time to max power in milliseconds
 int meterlevel = 0;
@@ -330,14 +330,16 @@ void loop() {
 
   // song selection
   int theme_switch = digitalRead(MUSIC_SWITCH);
-
-  if (theme_switch == LOW  && startpack == HIGH) {
+  if (startpack == HIGH ) {
     encoderRead();
-    /*
-      if (songplaying == true)
+  }
+  if (theme_switch == LOW  && startpack == HIGH) {
+    //  encoderRead();
+
+    if (songplaying == true)
       song ++;
-      if (song > 6)song = 1;
-      switch (song) {
+    if (song > 6)song = 1;
+    switch (song) {
       case 1:
         mp3.play(3);
         break;
@@ -356,7 +358,7 @@ void loop() {
       case 6:
         mp3.stop();
         break;
-      }*/
+    }
     songplaying = false;
   }
 
@@ -1139,14 +1141,23 @@ void encoderRead() {
     // the encoder is rotating CCW so decrement
     if (digitalRead(DT) != currentStateCLK) {
       counter --;
-      if (counter < 0)counter = 0;
-      mp3.play(counter);
+      if (counter <= 0) {
+        playing--;
+        counter = 10;
+      }
+      if (playing < 3)playing = 3;
+      mp3.play(playing);
       currentDir = "CCW";
     } else {
-      // Encoder is rotating CW so increment
       counter ++;
-      if (counter > 0)counter = 6;
-      mp3.play(counter);
+      // Encoder is rotating CW so increment
+      if (counter >= 20) {
+        playing++;
+        counter = 10;
+      }
+
+      if (playing > 7)playing = 7;
+      mp3.play(playing);
       currentDir = "CW";
     }
 
@@ -1166,7 +1177,7 @@ void encoderRead() {
   if (btnState == LOW) {
     //if 50ms have passed since last LOW pulse, it means that the
     //button has been pressed, released and pressed again
-    if (millis() - lastButtonPress > 200) {
+    if (millis() - lastButtonPress > 300) {
       Serial.println("Button pressed!");
       paused = !paused;
       if (paused) {
